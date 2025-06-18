@@ -6,7 +6,7 @@ RUN pip install docker requests paho-mqtt
 # Copy add-on files into the image.
 COPY run.sh /run.sh
 COPY monitor.py /monitor.py
-COPY config.json /config.json
+COPY config.yaml /config.yaml
 
 # Make run.sh executable.
 RUN chmod +x /run.sh
