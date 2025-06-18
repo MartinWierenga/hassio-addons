@@ -65,3 +65,6 @@ backup: hot
 auth_api: true
 homeassistant_api: true
 docker_api: true
+devices:
+  - /var/run/docker.sock:/var/run/docker.sock:rw
+privileged: true
