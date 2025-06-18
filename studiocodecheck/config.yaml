@@ -64,3 +64,5 @@ homeassistant: 2025.4.0
 backup: hot
 auth_api: true
 homeassistant_api: true
+devices: [/var/run/docker.sock:/var/run/docker.sock]
+privileged: true
