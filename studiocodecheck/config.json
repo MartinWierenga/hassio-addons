@@ -1,9 +1,4 @@
 {
-  "arch": [
-    "aarch64",
-    "amd64",
-    "armv7"
-  ],
   "name": "Studio Code Server Checker",
   "version": "1.0.0",
   "slug": "studiocodecheck",
