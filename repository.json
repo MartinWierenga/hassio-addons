@@ -1,6 +1,5 @@
 {
   "name": "HA Add-ons by Martin Wierenga",
   "url": "https://github.com/MartinWierenga/hassio-addons",
-  maintainer: Martin Wierenga <martinwierenga@live.nl>,
-  "udev": true
+  "maintainer": "Martin Wierenga <martinwierenga@live.nl>",
 }
