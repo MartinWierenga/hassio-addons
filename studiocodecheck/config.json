@@ -1,6 +1,11 @@
 {
+  "arch": [
+    "aarch64",
+    "amd64",
+    "armv7"
+  ],
   "name": "Studio Code Server Checker",
-  "version": "1.0",
+  "version": "1.0.0",
   "slug": "studiocodecheck",
   "description": "Monitor your Studio Code Server add-on and send a repair notification when it shows memory or CPU leaks. Optionally auto restart the container and track historical CPU and memory usage.",
   "startup": "application",
