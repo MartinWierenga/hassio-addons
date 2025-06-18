@@ -4,7 +4,10 @@ slug: studiocodecheck
 description: Monitor your Studio Code Server add-on and send a repair notification when it shows memory or CPU leaks. Optionally auto restart the container and track historical CPU and memory usage.
 url: https://github.com/MartinWierenga/hassio-addons/tree/main/studiocodecheck
 codenotary: martinwierenga@live.nl
-arch: amd64
+arch:
+  - armv7
+  - aarch64
+  - amd64
 startup: application
 boot: auto
 init: false
