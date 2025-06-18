@@ -1,3 +1,2 @@
-# hassio-addons
-
-First addon repo. Be gentle.
+# My Home Assistant repo
+Alle OS, integraties, addons, automations, scenes en andere instellingen.
