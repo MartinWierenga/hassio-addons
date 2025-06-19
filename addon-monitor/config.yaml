@@ -33,11 +33,3 @@ homeassistant_api: true
 docker_api: true
 devices:
   - /var/run/docker.sock:/var/run/docker.sock:rw
-environment:
-  - ADDON_SLUG
-  - CPU_THRESHOLD
-  - MEMORY_THRESHOLD
-  - INTERVAL
-  - CPU_FAILURES
-  - MEMORY_FAILURES
-  - AUTO_RESTART
