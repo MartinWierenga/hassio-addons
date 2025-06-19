@@ -10,6 +10,15 @@ def get_config():
     with open(CONFIG_PATH, "r") as f:
         return json.load(f)
 
+def get_env_var(name, default=None, cast=str):
+    value = os.getenv(name, default)
+    if value is not None:
+        try:
+            return cast(value)
+        except Exception:
+            return default
+    return default
+
 def get_addon_stats(slug):
     url = f"http://supervisor/addons/{slug}/stats"
     headers = {"Authorization": f"Bearer {os.getenv('SUPERVISOR_TOKEN')}"}
@@ -35,6 +44,9 @@ def monitor_addon(addon):
     cpu_threshold = addon["cpu_threshold"]
     memory_threshold = addon["memory_threshold"]
     interval = addon["interval"]
+    cpu_failures_limit = addon["cpu_failures"]
+    memory_failures_limit = addon["memory_failures"]
+    auto_restart = addon["auto_restart"]
     cpu_failures = 0
     mem_failures = 0
 
@@ -52,11 +64,11 @@ def monitor_addon(addon):
             else:
                 mem_failures = 0
 
-            print(f"[{slug}] CPU: {cpu}% ({cpu_failures}/{addon['cpu_failures']}), "
-                  f"Memory: {mem}% ({mem_failures}/{addon['memory_failures']})")
+            print(f"[{slug}] CPU: {cpu}% ({cpu_failures}/{cpu_failures_limit}), "
+                  f"Memory: {mem}% ({mem_failures}/{memory_failures_limit})")
 
-            if addon["auto_restart"]:
-                if cpu_failures >= addon["cpu_failures"] or mem_failures >= addon["memory_failures"]:
+            if auto_restart:
+                if cpu_failures >= cpu_failures_limit or mem_failures >= memory_failures_limit:
                     print(f"[{slug}] Restarting due to threshold exceeded.")
                     restart_addon(slug)
                     cpu_failures = 0
