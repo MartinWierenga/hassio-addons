@@ -1,0 +1,34 @@
+{
+  "name": "Addon Monitor",
+  "version": "1.0.0",
+  "slug": "addon_monitor",
+  "description": "Monitors other add-ons for CPU and memory usage.",
+  "startup": "services",
+  "boot": "auto",
+  "options": {
+    "addons": [
+      {
+        "slug": "core_mosquitto",
+        "cpu_threshold": 80,
+        "memory_threshold": 80,
+        "interval": 60,
+        "cpu_failures": 3,
+        "memory_failures": 3,
+        "auto_restart": true
+      }
+    ]
+  },
+  "schema": {
+    "addons": [
+      {
+        "slug": "str",
+        "cpu_threshold": "int(0,100)",
+        "memory_threshold": "int(0,100)",
+        "interval": "int(1,3600)",
+        "cpu_failures": "int(1,10)",
+        "memory_failures": "int(1,10)",
+        "auto_restart": "bool"
+      }
+    ]
+  }
+}
