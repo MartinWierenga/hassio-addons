@@ -1,14 +1,6 @@
 import os
-import json
 import time
 import requests
-import threading
-
-CONFIG_PATH = "/data/options.json"
-
-def get_config():
-    with open(CONFIG_PATH, "r") as f:
-        return json.load(f)
 
 def get_env_var(name, default=None, cast=str):
     value = os.getenv(name, default)
@@ -39,14 +31,15 @@ def restart_addon(slug):
     except Exception as e:
         print(f"Error restarting {slug}: {e}")
 
-def monitor_addon(addon):
-    slug = addon["slug"]
-    cpu_threshold = addon["cpu_threshold"]
-    memory_threshold = addon["memory_threshold"]
-    interval = addon["interval"]
-    cpu_failures_limit = addon["cpu_failures"]
-    memory_failures_limit = addon["memory_failures"]
-    auto_restart = addon["auto_restart"]
+def monitor_addon():
+    slug = get_env_var("ADDON_SLUG")
+    cpu_threshold = get_env_var("CPU_THRESHOLD", 80, int)
+    memory_threshold = get_env_var("MEMORY_THRESHOLD", 80, int)
+    interval = get_env_var("INTERVAL", 60, int)
+    cpu_failures_limit = get_env_var("CPU_FAILURES", 3, int)
+    memory_failures_limit = get_env_var("MEMORY_FAILURES", 3, int)
+    auto_restart = str(get_env_var("AUTO_RESTART", "true")).lower() == "true"
+
     cpu_failures = 0
     mem_failures = 0
 
@@ -78,16 +71,5 @@ def monitor_addon(addon):
 
         time.sleep(interval)
 
-def main():
-    config = get_config()
-    threads = []
-    for addon in config["addons"]:
-        t = threading.Thread(target=monitor_addon, args=(addon,), daemon=True)
-        t.start()
-        threads.append(t)
-    # Keep main thread alive
-    while True:
-        time.sleep(60)
-
 if __name__ == "__main__":
-    main()
+    monitor_addon()
