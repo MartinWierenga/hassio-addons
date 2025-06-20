@@ -60,10 +60,14 @@ services:
   - mqtt:want
 udev: true
 full_access: true
+supervisor_api: true
 homeassistant: 2025.4.0
 backup: hot
-auth_api: true
-homeassistant_api: true
+privileged:
+  - SYS_ADMIN
+homeassistant_api: false
+auth_api: false
+ingress: false
 docker_api: true
 devices:
   - /var/run/docker.sock:/var/run/docker.sock:rw
