@@ -14,9 +14,48 @@ init: false
 hassio_api: true
 hassio_role: admin
 host_network: true
-map:
-  - /var/run/docker.sock: /var/run/docker.sock
-  - /data: /data
+options:
+  cpu_threshold: 80
+  mem_threshold: 80
+  check_interval: 60
+  failure_count: 3
+  container_name: 622ab00c6adc
+  use_mqtt_logging: false
+  log_file_max_bytes: 1048576
+  log_file_backup_count: 3
+  mqtt_broker: 
+  mqtt_port: 1883
+  mqtt_topic: homeassistant/studio_code_logs
+  mqtt_username: 
+  mqtt_password: 
+  enable_auto_restart: true
+  enable_notifications: false
+  healthcheck_port: 8080
+  notification_title: Studio Code Server Checker Repair
+  homeassistant_url: http://supervisor/core
+  enable_historical_tracking: true
+  historical_tracking_file: /data/historical_usage.csv
+schema:
+  cpu_threshold: int
+  mem_threshold: int
+  check_interval: int
+  failure_count: int
+  container_name: str
+  use_mqtt_logging: bool
+  log_file_max_bytes: int
+  log_file_backup_count: int
+  mqtt_broker: str
+  mqtt_port: int
+  mqtt_topic: str
+  mqtt_username: str
+  mqtt_password: str
+  enable_auto_restart: bool
+  enable_notifications: bool
+  healthcheck_port: int
+  notification_title: str
+  homeassistant_url: str
+  enable_historical_tracking: bool
+  historical_tracking_file: str
 services:
   - mqtt:want
 udev: true
@@ -26,3 +65,5 @@ backup: hot
 auth_api: true
 homeassistant_api: true
 docker_api: true
+devices:
+  - /var/run/docker.sock:/var/run/docker.sock:rw
