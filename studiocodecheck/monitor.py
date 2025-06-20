@@ -23,7 +23,7 @@ CPU_THRESHOLD = float(os.getenv("CPU_THRESHOLD", "80"))
 MEM_THRESHOLD = float(os.getenv("MEM_THRESHOLD", "80"))
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "60"))
 FAILURE_COUNT = int(os.getenv("FAILURE_COUNT", "3"))
-CONTAINER_NAME = os.getenv("CONTAINER_NAME", "622ab00c6adc")
+CONTAINER_NAME = os.getenv("CONTAINER_NAME", "code-server")
 
 # Boolean toggle – if true then use MQTT logging, else use local logging.
 USE_MQTT_LOGGING = os.getenv("USE_MQTT_LOGGING", "false").lower() == "true"
