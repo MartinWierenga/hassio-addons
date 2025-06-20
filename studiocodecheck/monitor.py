@@ -19,8 +19,8 @@ except ImportError:
 # ----------------------------
 # Read configuration from environment variables
 # ----------------------------
-CPU_THRESHOLD = float(os.getenv("CPU_THRESHOLD", "80"))
-MEM_THRESHOLD = float(os.getenv("MEM_THRESHOLD", "80"))
+CPU_THRESHOLD = float(os.getenv("CPU_THRESHOLD", "5"))
+MEM_THRESHOLD = float(os.getenv("MEM_THRESHOLD", "5"))
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "60"))
 FAILURE_COUNT = int(os.getenv("FAILURE_COUNT", "3"))
 CONTAINER_NAME = os.getenv("CONTAINER_NAME", "addon_a0d7b954_vscode")

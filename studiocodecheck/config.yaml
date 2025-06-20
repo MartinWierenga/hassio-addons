@@ -15,8 +15,8 @@ hassio_api: true
 hassio_role: admin
 host_network: true
 options:
-  cpu_threshold: 80
-  mem_threshold: 80
+  cpu_threshold: 5
+  mem_threshold: 5
   check_interval: 60
   failure_count: 3
   container_name: addon_a0d7b954_vscode
