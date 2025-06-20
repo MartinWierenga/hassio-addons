@@ -19,8 +19,13 @@ options:
     - addon1
     - addon2
 schema:
-  monitor_containers: 
-    - list { type: string }
+  monitor_containers:
+    type: list
+    items:
+      type: string
+map:
+  /var/run/docker.sock: /var/run/docker.sock
+  /data: /data
 services:
   - mqtt:want
 udev: true
@@ -30,5 +35,3 @@ backup: hot
 auth_api: true
 homeassistant_api: true
 docker_api: true
-devices:
-  - /var/run/docker.sock:/var/run/docker.sock:rw
