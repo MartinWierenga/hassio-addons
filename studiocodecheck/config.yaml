@@ -18,8 +18,7 @@ options:
   monitor_containers:
     - addon1
     - addon2
-schema:
-  monitor_containers: list(str)
+schema: '{"monitor_containers": "list"}'
 map:
   - /var/run/docker.sock: /var/run/docker.sock
   - /data: /data
