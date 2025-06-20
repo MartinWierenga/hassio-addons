@@ -20,7 +20,6 @@ options:
     - addon2
 schema:
   monitor_containers:
-    type: list
     description: List of add-ons to monitor for CPU and memory leaks.
     default: []
     required: true
