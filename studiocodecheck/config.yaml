@@ -19,7 +19,7 @@ options:
   mem_threshold: 80
   check_interval: 60
   failure_count: 3
-  container_name: 622ab00c6adc
+  container_name: addon_a0d7b954_vscode
   use_mqtt_logging: false
   log_file_max_bytes: 1048576
   log_file_backup_count: 3
