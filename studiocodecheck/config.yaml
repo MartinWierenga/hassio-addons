@@ -19,10 +19,7 @@ options:
     - addon1
     - addon2
 schema:
-  monitor_containers:
-    description: List of add-ons to monitor for CPU and memory leaks.
-    default: []
-    required: true
+  monitor_containers: list(str)
 map:
   - /var/run/docker.sock: /var/run/docker.sock
   - /data: /data
