@@ -21,8 +21,6 @@ options:
 schema:
   monitor_containers:
     type: list
-    items:
-      type: string
 map:
   - /var/run/docker.sock: /var/run/docker.sock
   - /data: /data
