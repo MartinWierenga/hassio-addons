@@ -15,12 +15,12 @@ hassio_api: true
 hassio_role: admin
 host_network: true
 options:
-monitor_containers:
-  - addon1
-  - addon2
+  monitor_containers:
+    - addon1
+    - addon2
 schema:
-monitor_containers: 
-  - list { type: string }
+  monitor_containers: 
+    - list { type: string }
 services:
   - mqtt:want
 udev: true
