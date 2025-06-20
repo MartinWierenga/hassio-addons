@@ -19,7 +19,7 @@ except ImportError:
 # ----------------------------
 # Read configuration from environment variables
 # ----------------------------
-CPU_THRESHOLD = float(os.getenv("CPU_THRESHOLD", "5"))
+CPU_THRESHOLD = float(os.getenv("CPU_THRESHOLD", "0"))
 MEM_THRESHOLD = float(os.getenv("MEM_THRESHOLD", "5"))
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "60"))
 FAILURE_COUNT = int(os.getenv("FAILURE_COUNT", "3"))
