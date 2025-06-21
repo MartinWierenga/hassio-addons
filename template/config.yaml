@@ -1,0 +1,32 @@
+name: Example Template Add-on
+version: 1.0.0
+slug: exampleaddontemplate
+description: Use this to start with your new add-on.
+url: https://github.com/MartinWierenga/hassio-addons
+codenotary: martinwierenga@live.nl
+arch:
+  - armv7
+  - aarch64
+  - amd64
+startup: application
+boot: auto
+init: false
+hassio_api: true
+hassio_role: admin
+host_network: true
+options:
+  homeassistant_url: http://supervisor/core
+  enable_historical_tracking: true
+  historical_tracking_file: /data/historical_usage.csv
+schema:
+  homeassistant_url: str
+  enable_historical_tracking: bool
+  historical_tracking_file: str
+udev: true
+full_access: false
+supervisor_api: true
+homeassistant: 2025.4.0
+backup: hot
+homeassistant_api: false
+auth_api: false
+ingress: false
