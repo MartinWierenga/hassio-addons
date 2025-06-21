@@ -1,4 +1,4 @@
-# Example add-on
+# Template Example add-on
 
 This is a example add-on to be used as a template creating your add-ons
 
