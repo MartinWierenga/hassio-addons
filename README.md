@@ -1,2 +1,2 @@
-# My Home Assistant repo
-Alle OS, integraties, addons, automations, scenes en andere instellingen.
+# Template Example Addon
+Starting point for new addons

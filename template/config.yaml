@@ -1,6 +1,6 @@
 name: Example Template Add-on
 version: 1.0.0
-slug: exampleaddontemaplate
+slug: exampleaddontemplate
 description: Use this to start with your new add-on.
 url: https://github.com/MartinWierenga/hassio-addons
 codenotary: martinwierenga@live.nl
