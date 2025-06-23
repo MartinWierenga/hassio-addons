@@ -9,11 +9,3 @@ arch:
   - amd64
 startup: services
 boot: auto
-port:
-  - 8000/tcp
-map:
-  - media/models
-full_access: true
-supervisor_api: true
-homeassistant: 2025.6.0
-backup: hot
