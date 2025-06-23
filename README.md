@@ -6,7 +6,7 @@ Welcome to my Home Assistant Add-ons repository! This repository hosts custom ad
 
 To add this repository to your Home Assistant Add-ons, simply click the button below:
 
-[![Add to Home Assistant](https://camo.githubusercontent.com/8cec5af6ba93659beb5352741334ef3bbee70c4cb725f20832a1b897dfb8fc5f/68747470733a2f2f6d792e686f6d652d617373697374616e742e696f2f6261646765732f686163735f7265706f7369746f72792e737667)](https://my.home-assistant.io/redirect/repository/?repository=https://github.com/MartinWierenga/hassio-addons)
+[![Add to Home Assistant](https://camo.githubusercontent.com/30d41447c8fdefec56880fcce608c09f79c1aaae8f38af261f7817ac0392e421/68747470733a2f2f6d792e686f6d652d617373697374616e742e696f2f6261646765732f73757065727669736f725f6164645f6164646f6e5f7265706f7369746f72792e737667)](https://my.home-assistant.io/redirect/repository/?repository=https://github.com/MartinWierenga/hassio-addons)
 
 
 Alternatively, you can add this repository manually by following these steps:
