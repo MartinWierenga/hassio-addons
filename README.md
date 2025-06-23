@@ -1,4 +1,4 @@
-# Home Assistant Add-ons Repository
+# Home Assistant Add-ons Repository by Martin Wierenga
 
 Welcome to my Home Assistant Add-ons repository! This repository hosts custom add-ons for Home Assistant, including the LLaMA Server Add-on that wraps the [`ghcr.io/ggml-org/llama.cpp:server-intel`](https://github.com/ggml-org/llama.cpp/blob/master/docs/docker.md) image with dynamically configurable parameters.
 
