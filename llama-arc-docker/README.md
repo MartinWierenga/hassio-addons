@@ -1,6 +1,6 @@
-# Template Example add-on
+# Llama Intel Arc Docker
 
-This is a example add-on to be used as a template creating your add-ons
+Addon to run Llama.cpp, full server, docker container that supports Intel Arc
 
 ## License
 

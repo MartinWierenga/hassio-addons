@@ -1,0 +1,29 @@
+name: Llama Intel Arc Docker
+version: 1.0.0
+slug: llamadockerintelarc
+description: Docker container for running Llama models with Intel Arc GPU support.
+maintainer: Martin Wierenga
+url: https://github.com/MartinWierenga/hassio-addons
+codenotary: martinwierenga@live.nl
+arch:
+  - amd64
+startup: services
+boot: auto
+port:
+  - 8000/tcp
+map:
+  - media/models
+full_access: true
+supervisor_api: true
+homeassistant: 2025.6.0
+backup: hot
+options:
+  model_file: 7B/ggml-model-q4_0.gguf
+  server_port: 8000
+  host: 0.0.0.0
+  num_tokens: 512
+schema:
+  model_file: str
+  server_port: int
+  host: str
+  num_tokens: int
