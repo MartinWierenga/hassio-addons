@@ -9,3 +9,4 @@ arch:
   - amd64
 startup: services
 boot: auto
+init: false
