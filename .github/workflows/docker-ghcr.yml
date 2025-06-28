@@ -1,5 +1,6 @@
 name: Build and Push to GHCR
 
+# This workflow builds a Docker image for the FastChat Intel GPU add-on and pushes it to GitHub Container Registry (GHCR).
 on:
   push:
     paths:
