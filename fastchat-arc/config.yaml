@@ -27,3 +27,16 @@ schema:
   max_gpu_memory: str
   log_level: list(info|warning|error|debug)
   log_path: str
+
+map:
+  - share:rw
+  - config:rw
+  - media:rw
+
+privileged:
+  - SYS_ADMIN
+  - SYS_RAWIO
+  - DAC_READ_SEARCH
+  - IPC_LOCK
+
+full_access: true
