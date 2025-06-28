@@ -3,16 +3,20 @@
 # ─────────────────────────────────────────────────────────────────────────────
 FROM alpine:3.18 AS fastchat-xpu
 
-# 1) Pin repos & enable community + edge for Intel packages
+# ─────────────────────────────────────────────────────────────────────────────
+# 1) Pin Alpine 3.18 repos + enable edge/community & testing for Intel pkgs
+# ─────────────────────────────────────────────────────────────────────────────
 RUN printf '%s\n' \
-    "https://dl-cdn.alpinelinux.org/alpine/v3.18/main" \
-    "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" \
-    "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
-    "https://dl-cdn.alpinelinux.org/alpine/edge/testing" \
-  > /etc/apk/repositories \
+     "https://dl-cdn.alpinelinux.org/alpine/v3.18/main" \
+     "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" \
+     "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
+     "https://dl-cdn.alpinelinux.org/alpine/edge/testing" \
+   > /etc/apk/repositories \
  && apk update
 
-# 2) Install runtime & build deps
+# ─────────────────────────────────────────────────────────────────────────────
+# 2) Install only the packages that actually exist on Alpine 3.18
+# ─────────────────────────────────────────────────────────────────────────────
 RUN apk add --no-cache \
       bash \
       ca-certificates \
@@ -31,21 +35,23 @@ RUN apk add --no-cache \
       libgomp \
       jemalloc \
       jemalloc-dev \
-      glib \
-      mesa-dri-gallium \
-      mesa-va-gallium \
-      mesa-vdpau \
-      mesa-vulkan \
       libva-utils \
       clinfo \
       vainfo \
       hwinfo \
+      # Intel GPU/OpenCL/VAAPI from edge/community:
       intel-compute-runtime \
       intel-media-driver \
-      libegl \
-      libgbm \
+      # GL/EGL/GBM—bring in libglvnd and headers:
+      libglvnd \
       libglvnd-dev \
       mesa-dev
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3) Verify install & cleanup
+# ─────────────────────────────────────────────────────────────────────────────
+RUN vainfo && clinfo && \
+    rm -rf /var/cache/apk/*
 
 # 3) Force jemalloc as allocator (same as LD_PRELOAD on Ubuntu)
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so
