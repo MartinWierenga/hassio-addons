@@ -7,13 +7,15 @@ ingress: true
 panel_icon: mdi:robot
 panel_title: FastChat
 init: false
-image: "ghcr.io/martinwierenga/fastchat-intel-gpu:1.0.0"
 ports:
   "8000/tcp": 8000
   "7860/tcp": 7860
 ingress_port: 7860
 arch:
   - amd64
+
+build_from:
+  amd64: ghcr.io/martinwierenga/fastchat-intel-gpu:1.0.0
 
 options:
   model_path: "/share/models/vicuna-7b"
