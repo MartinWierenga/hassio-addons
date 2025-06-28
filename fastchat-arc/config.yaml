@@ -7,7 +7,7 @@ ingress: true
 panel_icon: mdi:robot
 panel_title: FastChat
 init: false
-image: "ghcr.io/martinwierenga/fastchat-intel-gpu:latest"
+image: "martinwierenga/fastchat"
 ports:
   "8000/tcp": 8000
   "7860/tcp": 7860
