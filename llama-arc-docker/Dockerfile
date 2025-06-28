@@ -1,89 +1,86 @@
-###############################################################################
-# FastChat-XPU on Alpine Linux 3.18 + Python 3.10
-###############################################################################
-FROM python:3.10-alpine3.18 AS fastchat-xpu
+FROM alpine:edge
 
-# 1) Enable edge/community (for Intel compute-runtime & media-driver, git-lfs)
-RUN printf '%s\n' \
-     "https://dl-cdn.alpinelinux.org/alpine/v3.18/main" \
-     "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" \
-     "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
-   > /etc/apk/repositories \
- && apk update
+# Add edge community repo and install dependencies
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    apk update && \
+    apk add --no-cache \
+    python3.10 \
+    py3-pip \
+    py3-setuptools \
+    py3-virtualenv \
+    build-base \
+    cmake \
+    curl \
+    git \
+    git-lfs \
+    libffi-dev \
+    jemalloc-dev \
+    bash \
+    wget \
+    unzip \
+    clinfo \
+    numactl-dev \
+    libstdc++ \
+    libexecinfo-dev \
+    libglvnd-dev \
+    mesa-dev \
+    mesa-gl \
+    mesa-gbm \
+    mesa-egl \
+    mesa-glapi \
+    egl-wayland \
+    libx11 \
+    libxext \
+    libxrender \
+    libxcomposite \
+    libxrandr \
+    libxcursor \
+    libxdamage \
+    libxfixes \
+    libxi \
+    libxinerama \
+    libxxf86vm \
+    libdrm \
+    libjpeg-turbo \
+    libpng \
+    freetype
 
-# 2) Core tools, jemalloc, OpenCL & VA-API headers + utils
-RUN apk add --no-cache \
-      bash \
-      ca-certificates \
-      gnupg \
-      unzip \
-      wget \
-      curl \
-      build-base      \   # gcc, make, etc.
-      git             \
-      linux-headers   \
-      libstdc++       \
-      libgomp         \
-      jemalloc        \
-      jemalloc-dev    \
-      opencl-headers  \
-      numactl         \
-      libva-utils     \   # provides vainfo
-      clinfo
+# Create virtualenv
+RUN python3.10 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# 3) git-lfs + Intel GPU/OpenCL & media-driver from edge/community
-RUN apk add --no-cache \
-      --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
-        git-lfs \
-        intel-compute-runtime \
-        intel-media-driver
+# Upgrade pip
+RUN pip install --upgrade pip setuptools wheel
 
-# 4) Smoke-test VA-API & OpenCL
-RUN vainfo && clinfo
+# Set jemalloc preload path if it exists
+ENV LD_PRELOAD=/usr/lib/libjemalloc.so
 
-# 5) Force jemalloc + 100% VRAM flags
-ENV LD_PRELOAD=/usr/lib/libjemalloc.so \
-    NEOReadDebugKeys=1 \
-    ClDeviceGlobalMemSizeAvailablePercent=100
+# Install Torch (pure CPU-only or compatible build; GPU/XPU not supported on Alpine directly)
+RUN pip install torch==2.0.1 torchvision==0.15.2
 
-# 6) Create & activate a venv, upgrade pip/setuptools
-RUN python3 -m venv /opt/venv \
- && /opt/venv/bin/pip install --upgrade pip setuptools
-ENV PATH="/opt/venv/bin:${PATH}"
+# Install llama-cpp-python with clblast support
+ENV CMAKE_ARGS="-DLLAMA_CLBLAST=on"
+RUN pip install --no-cache-dir llama-cpp-python --force-reinstall --upgrade
 
-# 7) Install Intel oneAPI Base Toolkit (DPCPP, MKL, shared libs)
-#    Place your BaseKit installer next to this Dockerfile
-COPY l_BaseKit_p_2023.2.1.*.sh /tmp/
-RUN chmod +x /tmp/l_BaseKit_*.sh \
- && /tmp/l_BaseKit_*.sh --silent --eula accept --install-dir /opt/intel/oneapi \
- && rm /tmp/l_BaseKit_*.sh
+# Install FastChat
+RUN pip install "fschat[model_worker,webui]"
 
-ENV PATH="/opt/intel/oneapi/compiler/latest/linux/bin:${PATH}" \
-    LD_LIBRARY_PATH="/opt/intel/oneapi/compiler/latest/linux/lib:${LD_LIBRARY_PATH}"
-
-# 8) Python libs: Torch+XPU, llama-cpp-python, fschat
-RUN pip install \
-      torch==2.0.1a0 \
-      torchvision==0.15.2a0 \
-      intel_extension_for_pytorch==2.0.110+xpu \
-        --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/ \
- && CMAKE_ARGS="-DLLAMA_CLBLAST=on" FORCE_CMAKE=1 \
-    pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir \
- && pip install "fschat[model_worker,webui]"
-
-# 9) Volumes, workdir, ports, entrypoint
+# Setup volumes and working dir
 VOLUME [ "/deps", "/logs", "/root/.cache/huggingface" ]
-RUN mkdir /logs
+RUN mkdir -p /logs
 WORKDIR /logs
 
-EXPOSE 7860 8000
+# Environment configuration
+ENV FS_ENABLE_WEB=true
+ENV FS_ENABLE_OPENAI_API=true
+ENV LOGDIR=/logs
 
-ENV FS_ENABLE_WEB=true \
-    FS_ENABLE_OPENAI_API=true \
-    LOGDIR=/logs
-
+# Copy startup script
 COPY startup.sh /bin/start_fastchat.sh
 RUN chmod +x /bin/start_fastchat.sh
 
-ENTRYPOINT ["/bin/bash","/bin/start_fastchat.sh"]
-CMD ["--model-path","lmsys/vicuna-7b-v1.3","--max-gpu-memory","14Gib"]
+EXPOSE 7860
+EXPOSE 8000
+
+ENTRYPOINT [ "/bin/bash", "/bin/start_fastchat.sh" ]
+CMD ["--model-path", "lmsys/vicuna-7b-v1.3", "--max-gpu-memory", "14Gib"]
