@@ -9,4 +9,4 @@ mkdir -p "$LOG_PATH"
 ARGS="--model-path $MODEL_PATH --max-gpu-memory $MAX_GPU_MEMORY"
 echo "[INFO] Starting FastChat model_worker with args: $ARGS"
 
-exec fastchat.serve.model_worker $ARGS >> "$LOG_PATH/model_worker.log" 2>&1
+exec python3 -m fastchat.serve.model_worker $ARGS >> "$LOG_PATH/model_worker.log" 2>&1
