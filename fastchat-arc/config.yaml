@@ -1,5 +1,5 @@
 name: FastChat Intel GPU
-version: "1.0.1"
+version: "latest"
 slug: fastchat-arc
 description: Run OpenAI-compatible models locally with Intel Arc/iGPU on Home Assistant OS
 startup: application
@@ -14,7 +14,8 @@ ingress_port: 7860
 arch:
   - amd64
 
-image: 'ghcr.io/martinwierenga/fastchat-intel-gpu:1.0.0'
+image: "ghcr.io/martinwierenga/fastchat-intel-gpu"
+
 
 options:
   model_path: "/share/models/vicuna-7b"
