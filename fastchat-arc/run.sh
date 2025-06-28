@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-MODEL_PATH=$(jq -r '.model_path // "/models/vicuna-7b"' /data/options.json)
-MAX_GPU_MEMORY=$(jq -r '.max_gpu_memory // "14Gib"' /data/options.json)
+MODEL_PATH=$(jq -r '.model_path // "/models/naturalfunctions"' /data/options.json)
+MAX_GPU_MEMORY=$(jq -r '.max_gpu_memory // "8Gib"' /data/options.json)
 LOG_PATH=$(jq -r '.log_path // "/logs"' /data/options.json)
 
 mkdir -p "$LOG_PATH"
