@@ -1,104 +1,99 @@
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ============================================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage: fastchat-xpu on Alpine 3.18
+# ─────────────────────────────────────────────────────────────────────────────
+FROM alpine:3.18 AS fastchat-xpu
 
-ARG UBUNTU_VERSION=22.04
+# 1) Pin repos & enable community + edge for Intel packages
+RUN printf '%s\n' \
+    "https://dl-cdn.alpinelinux.org/alpine/v3.18/main" \
+    "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" \
+    "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
+    "https://dl-cdn.alpinelinux.org/alpine/edge/testing" \
+  > /etc/apk/repositories \
+ && apk update
 
-FROM ubuntu:${UBUNTU_VERSION} AS fastchat-xpu
+# 2) Install runtime & build deps
+RUN apk add --no-cache \
+      bash \
+      ca-certificates \
+      gnupg \
+      unzip \
+      wget \
+      build-base \
+      curl \
+      git \
+      git-lfs \
+      opencl-headers \
+      numactl \
+      python3 \
+      py3-pip \
+      py3-virtualenv \
+      libgomp \
+      jemalloc \
+      jemalloc-dev \
+      glib \
+      mesa-dri-gallium \
+      mesa-va-gallium \
+      mesa-vdpau \
+      mesa-vulkan \
+      libva-utils \
+      clinfo \
+      vainfo \
+      hwinfo \
+      intel-compute-runtime \
+      intel-media-driver \
+      libegl \
+      libgbm \
+      libglvnd-dev \
+      mesa-dev
 
+# 3) Force jemalloc as allocator (same as LD_PRELOAD on Ubuntu)
+ENV LD_PRELOAD=/usr/lib/libjemalloc.so
 
-ARG PYTHON=python3.10
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing \
-    ca-certificates \
-    gnupg2 \
-    gpg-agent \
-    unzip \
-    wget \
-    build-essential \
-    curl \
-    libgl1 \
-    libglib2.0-0 \
-    libgomp1 \
-    libjemalloc-dev \
-    git \
-    git-lfs \
-    curl \
-    opencl-headers \
-    clblast-utils \
-    numactl \
-    python3 libpython3.11 python3-pip python3-venv
-    
+# 4) Set up Python virtualenv
+RUN python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install --upgrade pip setuptools
+ENV PATH="/opt/venv/bin:${PATH}"
 
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN python3 -m pip install --upgrade pip setuptools
+# 5) Expose full VRAM to compute-runtime
+ENV NEOReadDebugKeys=1 \
+    ClDeviceGlobalMemSizeAvailablePercent=100
 
-# Force 100% available VRAM size for compute-runtime
-# See https://github.com/intel/compute-runtime/issues/586
-ENV NEOReadDebugKeys=1
-ENV ClDeviceGlobalMemSizeAvailablePercent=100
+# 6) Install Intel oneAPI via official installer
+#    Copy your .sh installer into the build context next to Dockerfile.
+COPY l_BaseKit_p_2023.2.1.*.sh /tmp/
+RUN chmod +x /tmp/l_BaseKit_*.sh \
+ && /tmp/l_BaseKit_*.sh \
+      --silent --eula accept \
+      --install-dir /opt/intel/oneapi \
+ && rm -f /tmp/l_BaseKit_*.sh
 
+ENV PATH="/opt/intel/oneapi/compiler/latest/linux/bin:${PATH}" \
+    LD_LIBRARY_PATH="/opt/intel/oneapi/compiler/latest/linux/lib:${LD_LIBRARY_PATH}"
 
-# oneAPI packages
-RUN no_proxy=$no_proxy wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
-   | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null && \
-   echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
-   | tee /etc/apt/sources.list.d/oneAPI.list
+# 7) Python-level installs: Torch, llama-cpp, fschat
+RUN pip install \
+      torch==2.0.1a0 \
+      torchvision==0.15.2a0 \
+      intel_extension_for_pytorch==2.0.110+xpu \
+        --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/ \
+ && CMAKE_ARGS="-DLLAMA_CLBLAST=on" FORCE_CMAKE=1 \
+    pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir \
+ && pip install "fschat[model_worker,webui]"
 
-# Intel driver index
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
-    gpg --dearmor --output /usr/share/keyrings/intel-graphics.gpg && \
-    echo "deb [arch=amd64,i386 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/gpu/ubuntu jammy client" \
-    | tee /etc/apt/sources.list.d/intel-gpu-jammy.list
-
-# Install Intel packages
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing \
-    intel-opencl-icd intel-level-zero-gpu level-zero \
-    level-zero-dev intel-oneapi-runtime-dpcpp-cpp intel-oneapi-runtime-mkl intel-oneapi-compiler-shared-common-2023.2.1 \
-    intel-media-va-driver-non-free libmfx1 libmfxgen1 libvpl2 \
-    libegl-mesa0 libegl1-mesa libegl1-mesa-dev libgbm1 libgl1-mesa-dev libgl1-mesa-dri \
-    libglapi-mesa libgles2-mesa-dev libglx-mesa0 libigdgmm12 libxatracker2 mesa-va-drivers \
-    mesa-vdpau-drivers mesa-vulkan-drivers va-driver-all vainfo hwinfo clinfo  && \
-    apt-get clean && \    
-    rm -rf  /var/lib/apt/lists/*
-
-
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
-
-# Install Torch
-RUN pip install torch==2.0.1a0 torchvision==0.15.2a0 intel_extension_for_pytorch==2.0.110+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
-
-# Install llama-cpp-python
-RUN CMAKE_ARGS="-DLLAMA_CLBLAST=on" FORCE_CMAKE=1 pip install llama-cpp-python  --force-reinstall --upgrade --no-cache-dir
-
-# Install fschat
-RUN pip install "fschat[model_worker,webui]"
-
-VOLUME [ "/deps" ]
-VOLUME [ "/logs" ]
-VOLUME [ "/root/.cache/huggingface" ]
+# 8) Volumes, workdir, ports, entrypoint
+VOLUME [ "/deps", "/logs", "/root/.cache/huggingface" ]
 RUN mkdir /logs
 WORKDIR /logs
 
-EXPOSE 7860
-EXPOSE 8000
-ENV FS_ENABLE_WEB=true
-ENV FS_ENABLE_OPENAI_API=true
-ENV LOGDIR=/logs
+EXPOSE 7860 8000
+
+ENV FS_ENABLE_WEB=true \
+    FS_ENABLE_OPENAI_API=true \
+    LOGDIR=/logs
 
 COPY startup.sh /bin/start_fastchat.sh
 RUN chmod 755 /bin/start_fastchat.sh
-ENTRYPOINT [ "/bin/bash", "/bin/start_fastchat.sh" ]
-CMD ["--model-path lmsys/vicuna-7b-v1.3 --max-gpu-memory 14Gib"]
+
+ENTRYPOINT ["/bin/bash","/bin/start_fastchat.sh"]
+CMD ["--model-path","lmsys/vicuna-7b-v1.3","--max-gpu-memory","14Gib"]
