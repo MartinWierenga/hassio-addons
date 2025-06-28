@@ -101,4 +101,4 @@ ENV LOGDIR=/logs
 COPY startup.sh /bin/start_fastchat.sh
 RUN chmod 755 /bin/start_fastchat.sh
 ENTRYPOINT [ "/bin/bash", "/bin/start_fastchat.sh" ]
-CMD ["--model-path lmsys/vicuna-7b-v1.3 --max-gpu-memory 8Gib"]
+CMD ["--model-path lmsys/vicuna-7b-v1.3 --max-gpu-memory 14Gib"]
