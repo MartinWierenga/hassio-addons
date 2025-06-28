@@ -1,0 +1,4 @@
+model_path: "/share/models/vicuna-7b"
+max_gpu_memory: "14Gib"
+log_level: "info"
+log_path: "/share/fastchat/logs"
