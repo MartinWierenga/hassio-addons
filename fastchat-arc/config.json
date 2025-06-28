@@ -1,11 +1,12 @@
 {
-  "name": "FastChat Intel Arc",
-  "version": "0.1.0",
-  "slug": "fastchat_arc",
-  "description": "FastChat web UI + OpenAI API using Intel Arc GPUs",
+  "name": "FastChat Intel GPU (DockerHub)",
+  "version": "1.0.0",
+  "slug": "fastchat_arc_dockerhub",
+  "description": "FastChat with OpenAI-compatible API using Intel Arc/Xe GPUs (external image)",
   "arch": ["amd64"],
   "startup": "services",
   "boot": "auto",
+  "image": "ghcr.io/martinwierenga/fastchat-intel-gpu:latest",
   "options": {
     "model_path": "/share/models/vicuna-7b",
     "max_gpu_memory": "14Gib",
