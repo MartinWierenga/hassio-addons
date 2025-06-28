@@ -1,4 +1,28 @@
-model_path: "/share/models/vicuna-7b"
-max_gpu_memory: "14Gib"
-log_level: "info"
-log_path: "/share/fastchat/logs"
+name: FastChat Intel GPU
+version: "1.0.0"
+slug: fastchat-arc
+description: Run OpenAI-compatible models locally with Intel Arc/iGPU on Home Assistant OS
+startup: application
+ingress: true
+panel_icon: mdi:robot
+panel_title: FastChat
+init: false
+image: "martinwierenga/fastchat"
+ports:
+  "8000/tcp": 8000
+  "7860/tcp": 7860
+ingress_port: 7860
+arch:
+  - amd64
+
+options:
+  model_path: "/share/models/vicuna-7b"
+  max_gpu_memory: "14Gib"
+  log_level: "info"
+  log_path: "/share/fastchat/logs"
+
+schema:
+  model_path: str
+  max_gpu_memory: str
+  log_level: list(info|warning|error|debug)
+  log_path: str
