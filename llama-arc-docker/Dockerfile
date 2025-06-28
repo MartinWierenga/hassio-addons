@@ -1,83 +1,119 @@
-# -----------------------------------------------------------------------------
-# FastChat-XPU on Python 3.10 Alpine 3.18
-# -----------------------------------------------------------------------------
-FROM python:3.10-alpine3.18 AS fastchat-xpu
+###############################################################################
+# Add-on:  Llama Intel Arc Docker (FastChat-XPU)
+# Supports: amd64
+###############################################################################
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
+ARG BUILD_VERSION
+ARG BUILD_ARCH
 
-# 1) Enable Intel edge/community for compute-runtime & media-driver
-RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
-     >> /etc/apk/repositories \
- && apk update
+FROM ${BUILD_FROM}
 
-# 2) Core shell tooling + git
-RUN apk add --no-cache \
-     bash \
-     ca-certificates \
-     gnupg \
-     unzip \
-     wget \
-     build-base \        # gcc, make, etc.
-     curl \
-     git \
- && apk add --no-cache \
-     --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
-     git-lfs
+###############################################################################
+# 1) ensure we’re root and install core tooling + Intel/OpenCL/VA-API
+###############################################################################
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates \
+      gnupg2 \
+      gpg-agent \
+      unzip \
+      wget \
+      build-essential \
+      curl \
+      libgl1 \
+      libglib2.0-0 \
+      libgomp1 \
+      libjemalloc-dev \
+      git \
+      git-lfs \
+      opencl-headers \
+      clinfo \
+      vainfo \
+      hwinfo \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# 3) Python-adjacent libs for venv & compiler support
-RUN apk add --no-cache \
-     linux-headers \
-     libstdc++ \
-     libgomp
+###############################################################################
+# 2) Add Intel oneAPI APT repos (GPG + list file)
+###############################################################################
+RUN curl -fsSL \
+      https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+    | gpg --dearmor \
+    | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
 
-# 4) jemalloc (mirrors your LD_PRELOAD on Ubuntu)
-RUN apk add --no-cache \
-     jemalloc \
-     jemalloc-dev
+RUN echo \
+    "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] \
+      https://apt.repos.intel.com/oneapi all main" \
+     | tee /etc/apt/sources.list.d/oneAPI.list
 
-# 5) OpenCL headers & NUMA
-RUN apk add --no-cache \
-     opencl-headers \
-     numactl
+###############################################################################
+# 3) Add Intel GPU driver repo (for compute-runtime & media driver)
+###############################################################################
+RUN curl -fsSL \
+      https://repositories.intel.com/gpu/intel-graphics.key \
+    | gpg --dearmor \
+    | tee /usr/share/keyrings/intel-graphics.gpg > /dev/null
 
-# 6) VA-API / OpenCL utilities
-RUN apk add --no-cache \
-     libva-utils \
-     clinfo \
-     vainfo \
-     hwinfo
+RUN echo \
+    "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] \
+      https://repositories.intel.com/gpu/ubuntu jammy client" \
+    | tee /etc/apt/sources.list.d/intel-gpu-jammy.list
 
-# 7) Intel GPU / OpenCL & media driver from edge/community
-RUN apk add --no-cache \
-     --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
-     intel-compute-runtime \
-     intel-media-driver
+###############################################################################
+# 4) Install Intel compute-runtime, media-driver, oneAPI runtimes
+###############################################################################
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      intel-opencl-icd \
+      intel-level-zero-gpu \
+      level-zero \
+      level-zero-dev \
+      intel-oneapi-runtime-dpcpp-cpp \
+      intel-oneapi-runtime-mkl \
+      intel-oneapi-compiler-shared-common-2023.2.1 \
+      intel-media-va-driver-non-free \
+      libmfx1 \
+      libmfxgen1 \
+      libvpl2 \
+      libegl-mesa0 \
+      libgbm1 \
+      libgl1-mesa-dri \
+      mesa-va-drivers \
+      mesa-vdpau-drivers \
+      mesa-vulkan-drivers \
+      va-driver-all \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# 8) Smoke-test that VA-API and OpenCL are working
-RUN vainfo && clinfo
-
-# 9) Force jemalloc as allocator
-ENV LD_PRELOAD=/usr/lib/libjemalloc.so
-
-# 10) Expose 100% of VRAM to Intel compute-runtime
-ENV NEOReadDebugKeys=1 \
+###############################################################################
+# 5) jemalloc preload + full-VRAM flags
+###############################################################################
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so \
+    NEOReadDebugKeys=1 \
     ClDeviceGlobalMemSizeAvailablePercent=100
 
-# 11) Create & activate Python venv, upgrade pip/setuptools
+###############################################################################
+# 6) Python venv + pip
+###############################################################################
 RUN python3 -m venv /opt/venv \
  && /opt/venv/bin/pip install --upgrade pip setuptools
 ENV PATH="/opt/venv/bin:${PATH}"
 
-# 12) Install Intel oneAPI Base Toolkit (DPCPP, MKL, shared libs)
-#     Copy your BaseKit installer next to this Dockerfile
+###############################################################################
+# 7) oneAPI BaseKit installer (copy your .sh next to this Dockerfile)
+###############################################################################
 COPY l_BaseKit_p_2023.2.1.*.sh /tmp/
 RUN chmod +x /tmp/l_BaseKit_*.sh \
  && /tmp/l_BaseKit_*.sh --silent --eula accept --install-dir /opt/intel/oneapi \
  && rm -f /tmp/l_BaseKit_*.sh
 
-# 13) Add oneAPI compiler tools to PATH & LD_LIBRARY_PATH
 ENV PATH="/opt/intel/oneapi/compiler/latest/linux/bin:${PATH}" \
     LD_LIBRARY_PATH="/opt/intel/oneapi/compiler/latest/linux/lib:${LD_LIBRARY_PATH}"
 
-# 14) Python-level installs: Torch + Intel XPU ext, llama-cpp-python, fschat
+###############################################################################
+# 8) Install Torch+XPU, llama-cpp, fschat
+###############################################################################
 RUN pip install \
       torch==2.0.1a0 \
       torchvision==0.15.2a0 \
@@ -87,7 +123,9 @@ RUN pip install \
     pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir \
  && pip install "fschat[model_worker,webui]"
 
-# 15) Volumes, workdir, ports, envs, entrypoint
+###############################################################################
+# 9) Volumes, workdir, ports, entrypoint
+###############################################################################
 VOLUME [ "/deps", "/logs", "/root/.cache/huggingface" ]
 RUN mkdir /logs
 WORKDIR /logs
