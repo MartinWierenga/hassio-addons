@@ -14,3 +14,12 @@ map:
   - media:rw
   - share:rw
   - addon_config:rw
+ports:
+  7860/tcp: 7860
+  8000/tcp: 8000
+ports_description:
+  7860/tcp: API interface (Not required for Ingress)
+  8000/tcp: Web interface (Not required for Ingress)
+
+environment:
+  LOG_FORMAT: "{LEVEL}: {MESSAGE}"
