@@ -38,5 +38,4 @@ privileged:
   - SYS_RAWIO
   - DAC_READ_SEARCH
   - IPC_LOCK
-
 full_access: true
