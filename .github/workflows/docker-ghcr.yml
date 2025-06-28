@@ -1,0 +1,46 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    paths:
+      - 'fastchat-arc/**'
+    branches:
+      - main
+    tags:
+      - '*'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set tag name
+        id: vars
+        run: |
+          TAG=${GITHUB_REF##*/}
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/fastchat-intel-gpu
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./fastchat-arc
+          file: ./fastchat-arc/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.tag }}
+            ${{ steps.vars.outputs.image }}:latest
