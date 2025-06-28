@@ -1,0 +1,35 @@
+{
+  "name": "FastChat Intel Arc",
+  "version": "0.1.0",
+  "slug": "fastchat_arc",
+  "description": "FastChat web UI + OpenAI API using Intel Arc GPUs",
+  "arch": ["amd64"],
+  "startup": "services",
+  "boot": "auto",
+  "options": {
+    "model_path": "/share/models/vicuna-7b",
+    "max_gpu_memory": "14Gib",
+    "log_level": "info",
+    "log_path": "/share/fastchat/logs"
+  },
+  "schema": {
+    "model_path": "str?",
+    "max_gpu_memory": "str?",
+    "log_level": "str?",
+    "log_path": "str?"
+  },
+  "ports": {
+    "7860/tcp": 7860,
+    "8000/tcp": 8000
+  },
+  "devices": ["/dev/dri"],
+  "map": [
+    "config:rw",
+    "share:rw"
+  ],
+  "webui": "http://[HOST]:7860",
+  "ingress": false,
+  "environment": {
+    "PYTHONUNBUFFERED": "1"
+  }
+}
