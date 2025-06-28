@@ -21,12 +21,10 @@ RUN apk add --no-cache \
       build-base        \
       curl \
       git \
-      git-lfs \
       opencl-headers \
       numactl \
       python3 \
       py3-pip \
-      py3-virtualenv \
       libgomp \
       jemalloc \
       jemalloc-dev \
@@ -35,21 +33,19 @@ RUN apk add --no-cache \
       libva-utils \
       clinfo \
       vainfo \
-      hwinfo
-
-# 3) Install Intel GPU/OpenCL & Media-driver from edge/community
-RUN apk add --no-cache \
+      hwinfo \
+# 3) Install git-lfs from edge/community
+ && apk add --no-cache \
       --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
-        intel-compute-runtime \
-        intel-media-driver
-
-# 4) Smoke-test VAAPI & OpenCL
-RUN vainfo && clinfo
+        git-lfs \
+# 4) Smoke-test
+ && vainfo \
+ && clinfo
 
 # 5) Force jemalloc as the allocator (mirrors LD_PRELOAD on Ubuntu)
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so
 
-# 6) Expose 100% VRAM to Intel compute-runtime
+# 6) Expose full VRAM to compute-runtime
 ENV NEOReadDebugKeys=1 \
     ClDeviceGlobalMemSizeAvailablePercent=100
 
@@ -59,19 +55,16 @@ RUN python3 -m venv /opt/venv \
 ENV PATH="/opt/venv/bin:${PATH}"
 
 # 8) Install Intel oneAPI Base Toolkit (DPCPP, MKL, shared libs)
-#    Place your installer l_BaseKit_*.sh beside this Dockerfile
 COPY l_BaseKit_p_2023.2.1.*.sh /tmp/
 RUN chmod +x /tmp/l_BaseKit_*.sh \
- && /tmp/l_BaseKit_*.sh \
-      --silent --eula accept \
-      --install-dir /opt/intel/oneapi \
+ && /tmp/l_BaseKit_*.sh --silent --eula accept --install-dir /opt/intel/oneapi \
  && rm -f /tmp/l_BaseKit_*.sh
 
 # 9) Add oneAPI compiler tools to PATH & LD_LIBRARY_PATH
 ENV PATH="/opt/intel/oneapi/compiler/latest/linux/bin:${PATH}" \
     LD_LIBRARY_PATH="/opt/intel/oneapi/compiler/latest/linux/lib:${LD_LIBRARY_PATH}"
 
-# 10) Python-level installs: Torch + Intel XPU extension, llama-cpp-python, fschat
+# 10) Python-level installs: Torch + Intel XPU ext, llama-cpp-python, fschat
 RUN pip install \
       torch==2.0.1a0 \
       torchvision==0.15.2a0 \
