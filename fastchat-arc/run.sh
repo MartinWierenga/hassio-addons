@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-LOG_PATH=${LOG_PATH:-/logs}
+LOG_PATH=${LOG_PATH:-/share/fastchat/logs}
 mkdir -p "$LOG_PATH"
 #
 ARGS="--model-path ${MODEL_PATH:-/share/models/naturalfunctions} --max-gpu-memory ${MAX_GPU_MEMORY:-8Gib}"
