@@ -1,29 +1,24 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# Stage: fastchat-xpu on Alpine 3.18
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# FastChat-XPU on Alpine Linux 3.18
+# -----------------------------------------------------------------------------
 FROM alpine:3.18 AS fastchat-xpu
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 1) Pin Alpine 3.18 repos + enable edge/community & testing for Intel pkgs
-# ─────────────────────────────────────────────────────────────────────────────
+# 1) Pin Alpine repos & enable edge/community for Intel packages
 RUN printf '%s\n' \
      "https://dl-cdn.alpinelinux.org/alpine/v3.18/main" \
      "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" \
      "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
-     "https://dl-cdn.alpinelinux.org/alpine/edge/testing" \
    > /etc/apk/repositories \
  && apk update
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 2) Install only the packages that actually exist on Alpine 3.18
-# ─────────────────────────────────────────────────────────────────────────────
+# 2) Install core tooling, Python, jemalloc & VAAPI/OpenCL utils
 RUN apk add --no-cache \
       bash \
       ca-certificates \
       gnupg \
       unzip \
       wget \
-      build-base \
+      build-base        \
       curl \
       git \
       git-lfs \
@@ -35,38 +30,36 @@ RUN apk add --no-cache \
       libgomp \
       jemalloc \
       jemalloc-dev \
+      libstdc++ \
+      linux-headers \
       libva-utils \
       clinfo \
       vainfo \
-      hwinfo \
-      # Intel GPU/OpenCL/VAAPI from edge/community:
-      intel-compute-runtime \
-      intel-media-driver \
-      # GL/EGL/GBM—bring in libglvnd and headers:
-      libglvnd \
-      libglvnd-dev \
-      mesa-dev
+      hwinfo
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 3) Verify install & cleanup
-# ─────────────────────────────────────────────────────────────────────────────
-RUN vainfo && clinfo && \
-    rm -rf /var/cache/apk/*
+# 3) Install Intel GPU/OpenCL & Media-driver from edge/community
+RUN apk add --no-cache \
+      --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
+        intel-compute-runtime \
+        intel-media-driver
 
-# 3) Force jemalloc as allocator (same as LD_PRELOAD on Ubuntu)
+# 4) Smoke-test VAAPI & OpenCL
+RUN vainfo && clinfo
+
+# 5) Force jemalloc as the allocator (mirrors LD_PRELOAD on Ubuntu)
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so
 
-# 4) Set up Python virtualenv
+# 6) Expose 100% VRAM to Intel compute-runtime
+ENV NEOReadDebugKeys=1 \
+    ClDeviceGlobalMemSizeAvailablePercent=100
+
+# 7) Create & activate Python venv, upgrade pip/setuptools
 RUN python3 -m venv /opt/venv \
  && /opt/venv/bin/pip install --upgrade pip setuptools
 ENV PATH="/opt/venv/bin:${PATH}"
 
-# 5) Expose full VRAM to compute-runtime
-ENV NEOReadDebugKeys=1 \
-    ClDeviceGlobalMemSizeAvailablePercent=100
-
-# 6) Install Intel oneAPI via official installer
-#    Copy your .sh installer into the build context next to Dockerfile.
+# 8) Install Intel oneAPI Base Toolkit (DPCPP, MKL, shared libs)
+#    Place your installer l_BaseKit_*.sh beside this Dockerfile
 COPY l_BaseKit_p_2023.2.1.*.sh /tmp/
 RUN chmod +x /tmp/l_BaseKit_*.sh \
  && /tmp/l_BaseKit_*.sh \
@@ -74,10 +67,11 @@ RUN chmod +x /tmp/l_BaseKit_*.sh \
       --install-dir /opt/intel/oneapi \
  && rm -f /tmp/l_BaseKit_*.sh
 
+# 9) Add oneAPI compiler tools to PATH & LD_LIBRARY_PATH
 ENV PATH="/opt/intel/oneapi/compiler/latest/linux/bin:${PATH}" \
     LD_LIBRARY_PATH="/opt/intel/oneapi/compiler/latest/linux/lib:${LD_LIBRARY_PATH}"
 
-# 7) Python-level installs: Torch, llama-cpp, fschat
+# 10) Python-level installs: Torch + Intel XPU extension, llama-cpp-python, fschat
 RUN pip install \
       torch==2.0.1a0 \
       torchvision==0.15.2a0 \
@@ -87,7 +81,7 @@ RUN pip install \
     pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir \
  && pip install "fschat[model_worker,webui]"
 
-# 8) Volumes, workdir, ports, entrypoint
+# 11) Volumes, workdir, ports, envs
 VOLUME [ "/deps", "/logs", "/root/.cache/huggingface" ]
 RUN mkdir /logs
 WORKDIR /logs
@@ -98,6 +92,7 @@ ENV FS_ENABLE_WEB=true \
     FS_ENABLE_OPENAI_API=true \
     LOGDIR=/logs
 
+# 12) Startup script & entrypoint
 COPY startup.sh /bin/start_fastchat.sh
 RUN chmod 755 /bin/start_fastchat.sh
 
