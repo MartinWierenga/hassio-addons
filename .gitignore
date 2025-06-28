@@ -1,0 +1,16 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+logs/
+fastchat-arc/logs/
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# System files
+.DS_Store
+.env

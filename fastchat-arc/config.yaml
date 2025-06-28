@@ -16,10 +16,9 @@ arch:
 
 image: "ghcr.io/martinwierenga/fastchat-intel-gpu"
 
-
 options:
-  model_path: "/share/models/vicuna-7b"
-  max_gpu_memory: "14Gib"
+  model_path: "/share/models/naturalfunctions"
+  max_gpu_memory: "12Gib"
   log_level: "info"
   log_path: "/share/fastchat/logs"
 

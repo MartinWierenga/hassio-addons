@@ -1,16 +1,19 @@
-# FastChat Intel GPU Home Assistant Add-on
+# FastChat Intel GPU Add-on for Home Assistant
 
-This add-on runs FastChat `model_worker` using Intel Arc or iGPU, with OpenAI-compatible API support, inside Home Assistant OS.
+Run OpenAI-compatible FastChat models on Intel Arc or iGPU hardware inside Home Assistant OS.
 
-## Configuration Options
+## 🔧 Configuration
 
-- `model_path`: Path to your model directory (e.g., `/share/models/vicuna-7b`)
-- `max_gpu_memory`: GPU memory allocation (e.g., `14Gib`)
-- `log_level`: Log verbosity (`info`, `warning`, `debug`, etc.)
-- `log_path`: Path to store logs (e.g., `/share/fastchat/logs`)
+| Option        | Description                            | Example                         |
+|---------------|----------------------------------------|---------------------------------|
+| `model_path`  | Model directory path                   | `/share/models/vicuna-7b`       |
+| `max_gpu_memory` | Maximum GPU memory allowed          | `14Gib`                         |
+| `log_level`   | Log verbosity                          | `info`, `debug`, `error`        |
+| `log_path`    | Log file directory                     | `/share/fastchat/logs`          |
 
-## Usage Notes
+## 📡 Features
 
-- Ensure your model files are placed under `/share/models/`
-- Logs are written to the configured path
-- Uses GHCR image: `ghcr.io/martinwierenga/fastchat-intel-gpu:1.0.0`
+- Intel GPU support
+- OpenAI-compatible API
+- Managed sidebar UI
+- Built for Home Assistant OS

@@ -1,4 +1,4 @@
-FROM ghcr.io/martinwierenga/fastchat-intel-gpu:1.0.0
+FROM ghcr.io/martinwierenga/fastchat-intel-gpu:1.0.1
 
 RUN apt-get update && apt-get install -y jq && rm -rf /var/lib/apt/lists/*
 
