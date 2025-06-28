@@ -1,5 +1,6 @@
-FROM ghcr.io/martinwierenga/fastchat-intel-gpu:latest
+#FROM ghcr.io/martinwierenga/fastchat-intel-gpu:latest
 #FROM ubuntu:22.04
+FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
