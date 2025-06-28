@@ -10,3 +10,7 @@ arch:
 startup: services
 boot: auto
 init: false
+map:
+  - media:rw
+  - share:rw
+  - addon_config:rw
