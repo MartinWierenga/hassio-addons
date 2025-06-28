@@ -27,7 +27,7 @@
     "config:rw",
     "share:rw"
   ],
-  "webui": "http://[HOST]:7860",
+  "webui": "http://[HOST]:[PORT:7860]",
   "ingress": false,
   "environment": {
     "PYTHONUNBUFFERED": "1"
