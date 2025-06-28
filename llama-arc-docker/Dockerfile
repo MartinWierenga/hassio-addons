@@ -18,7 +18,7 @@ RUN apk add --no-cache \
       gnupg \
       unzip \
       wget \
-      build-base        \
+      build-base \
       curl \
       git \
       opencl-headers \
@@ -34,18 +34,24 @@ RUN apk add --no-cache \
       clinfo \
       vainfo \
       hwinfo \
-# 3) Install git-lfs from edge/community
- && apk add --no-cache \
+      libglvnd \
+      libglvnd-dev \
+      mesa-dev
+
+# 3) Install git-lfs, Intel compute-runtime & media-driver from edge/community
+RUN apk add --no-cache \
       --repository https://dl-cdn.alpinelinux.org/alpine/edge/community \
         git-lfs \
-# 4) Smoke-test
- && vainfo \
- && clinfo
+        intel-compute-runtime \
+        intel-media-driver
+
+# 4) Validate VA-API & OpenCL
+RUN vainfo && clinfo
 
 # 5) Force jemalloc as the allocator (mirrors LD_PRELOAD on Ubuntu)
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so
 
-# 6) Expose full VRAM to compute-runtime
+# 6) Expose full VRAM to Intel compute-runtime
 ENV NEOReadDebugKeys=1 \
     ClDeviceGlobalMemSizeAvailablePercent=100
 
@@ -55,6 +61,7 @@ RUN python3 -m venv /opt/venv \
 ENV PATH="/opt/venv/bin:${PATH}"
 
 # 8) Install Intel oneAPI Base Toolkit (DPCPP, MKL, shared libs)
+#    Place your installer l_BaseKit_*.sh beside this Dockerfile
 COPY l_BaseKit_p_2023.2.1.*.sh /tmp/
 RUN chmod +x /tmp/l_BaseKit_*.sh \
  && /tmp/l_BaseKit_*.sh --silent --eula accept --install-dir /opt/intel/oneapi \
