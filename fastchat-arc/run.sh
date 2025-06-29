@@ -5,13 +5,11 @@ set -e
 HF_TOKEN="${HF_USER_ACCESS_TOKEN:-""}"
 # ... other envs
 
-if [[ -n "$HF_TOKEN" ]] && [ ! -f "$MODEL_PATH/config.json" ]; then
-  echo "Downloading model..."
-  python3 - <<EOF
-from huggingface_hub import snapshot_download
-snapshot_download(repo_id="mistralai/Mistral-7B-Instruct-v0.2", local_dir="${MODEL_PATH}", token="${HF_TOKEN}")
-EOF
+if [ ! -z "$HF_USER_ACCESS_TOKEN" ] && [ ! -d "$MODEL_PATH" ]; then
+    echo "[INFO] Downloading model from Hugging Face..."
+    python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='mistralai/Mistral-7B-Instruct-v0.2', local_dir='$MODEL_PATH', local_dir_use_symlinks=False, token='$HF_USER_ACCESS_TOKEN')"
 fi
+
 
 python3 -m fastchat.serve.model_worker --model-path "$MODEL_PATH" --max-gpu-memory "$MAX_GPU_MEMORY" &
 python3 -m fastchat.serve.controller --host 0.0.0.0 --port 21001 &
