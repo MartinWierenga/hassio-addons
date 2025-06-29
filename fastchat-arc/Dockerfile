@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir \
       fschat[model_worker,webui] \
       uvicorn
 
-# Copy your add‑on run script
+# Copy your add-on run script
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
