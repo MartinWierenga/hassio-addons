@@ -1,4 +1,5 @@
 name: FastChat Intel GPU
+version: "latest"
 slug: fastchat-arc
 description: Run FastChat with Intel Arc/iGPU (OpenAI API + Web UI)
 startup: application
@@ -8,16 +9,13 @@ panel_title: FastChat
 arch:
   - amd64
 
-image: "ghcr.io/martinwierenga/fastchat-intel-gpu:latest"
-version: "latest"    # or "1.0.2" if you tagged it
-
+image: "ghcr.io/martinwierenga/fastchat-intel-gpu"
 
 options:
   model_path: "/share/models/naturalfunctions"
   max_gpu_memory: "8Gib"
-  log_path: "/share/fastchat/logs"
   log_level: "debug"
-
+  log_path: "/share/fastchat/logs"
 
 schema:
   model_path: str
