@@ -11,11 +11,11 @@ arch:
 
 image: "ghcr.io/martinwierenga/fastchat-intel-gpu"
 
-options:
-  model_path: "/share/models/naturalfunctions"
-  max_gpu_memory: "8Gib"
-  log_level: "debug"
-  log_path: "/share/fastchat/logs"
+model_path: "/share/models/mistral-7b-instruct"
+max_gpu_memory: "8Gib"
+log_level: "debug"
+log_path: "/share/fastchat/logs"
+
 
 schema:
   model_path: str
