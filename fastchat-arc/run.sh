@@ -1,39 +1,42 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Load options from Home Assistant
-MODEL_PATH=$(jq -r '.model_path // "/models/vicuna-7b"' /data/options.json)
-MAX_GPU_MEMORY=$(jq -r '.max_gpu_memory // "14Gib"' /data/options.json)
-LOG_PATH=$(jq -r '.log_path // "/logs"' /data/options.json)
-LOG_LEVEL=$(jq -r '.log_level // "info"' /data/options.json)
+# 1) Load options
+MODEL_PATH=$(jq -r '.model_path // "/share/models/naturalfunctions"' /data/options.json)
+MAX_GPU_MEMORY=$(jq -r '.max_gpu_memory // "8Gib"'         /data/options.json)
+LOG_PATH=$(jq -r '.log_path       // "/share/fastchat/logs"' /data/options.json)
+LOG_LEVEL=$(jq -r '.log_level     // "info"'               /data/options.json)
 
+# 2) Prepare logs
 mkdir -p "$LOG_PATH"
-echo "[INFO] FastChat starting with MODEL_PATH=$MODEL_PATH, MAX_GPU_MEMORY=$MAX_GPU_MEMORY"
+echo "[INFO] FastChat booting..."
+echo "[INFO] MODEL_PATH    = $MODEL_PATH"
+echo "[INFO] MAX_GPU_MEMORY= $MAX_GPU_MEMORY"
+echo "[INFO] LOG_PATH      = $LOG_PATH"
+echo "[INFO] LOG_LEVEL     = $LOG_LEVEL"
 
-# 1) Controller
-uvicorn fastchat.serve.controller:app \
-     --host 0.0.0.0 --port 21001 \
-     --log-level "$LOG_LEVEL" \
-     > "$LOG_PATH/controller.log" 2>&1 &
+# 3) Start model worker (CLI)
+fastchat.serve.model_worker \
+  --model-path "$MODEL_PATH" \
+  --max-gpu-memory "$MAX_GPU_MEMORY" \
+  >> "$LOG_PATH/worker.log" 2>&1 &
 
-# 2) Worker
-uvicorn fastchat.serve.model_worker:app \
-     --host 0.0.0.0 --port 21002 \
-     --log-level "$LOG_LEVEL" \
-     --reload-dir "$MODEL_PATH" \
-     > "$LOG_PATH/worker.log" 2>&1 &
+# 4) Start controller
+python3 -m fastchat.serve.controller \
+  --host 0.0.0.0 --port 21001 \
+  --log-level "$LOG_LEVEL" \
+  >> "$LOG_PATH/controller.log" 2>&1 &
 
-# 3) OpenAI API
-uvicorn fastchat.serve.openai_api_server:app \
-     --host 0.0.0.0 --port 8000 \
-     --log-level "$LOG_LEVEL" \
-     > "$LOG_PATH/openai_api.log" 2>&1 &
+# 5) Start OpenAI-compatible API
+python3 -m fastchat.serve.openai_api_server \
+  --host 0.0.0.0 --port 8000 \
+  >> "$LOG_PATH/openai_api.log" 2>&1 &
 
-# 4) Web UI
-uvicorn fastchat.serve.gradio_web_server:app \
-     --host 0.0.0.0 --port 7860 \
-     --log-level "$LOG_LEVEL" \
-     > "$LOG_PATH/webui.log" 2>&1 &
+# 6) Start Web UI (Gradio)
+python3 -m fastchat.serve.gradio_web_server \
+  --controller-address http://localhost:21001 \
+  --port 7860 \
+  >> "$LOG_PATH/webui.log" 2>&1 &
 
-# Keep container alive
-tail -F "$LOG_PATH"/*.log
+# 7) Keep container alive by tailing log files
+exec tail -F "$LOG_PATH"/*.log
