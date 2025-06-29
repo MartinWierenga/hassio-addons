@@ -1,16 +1,11 @@
 name: FastChat Intel GPU
 version: "latest"
 slug: fastchat-arc
-description: Run OpenAI-compatible models locally with Intel Arc/iGPU on Home Assistant OS
+description: Run FastChat with Intel Arc/iGPU (OpenAI API + Web UI)
 startup: application
 ingress: true
 panel_icon: mdi:robot
 panel_title: FastChat
-init: false
-ports:
-  "8000/tcp": 8000
-  "7860/tcp": 7860
-ingress_port: 7860
 arch:
   - amd64
 
@@ -27,15 +22,3 @@ schema:
   max_gpu_memory: str
   log_level: list(info|warning|error|debug)
   log_path: str
-
-map:
-  - share:rw
-  - config:rw
-  - media:rw
-
-privileged:
-  - SYS_ADMIN
-  - SYS_RAWIO
-  - DAC_READ_SEARCH
-  - IPC_LOCK
-full_access: true
