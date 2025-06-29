@@ -36,7 +36,7 @@ uvicorn fastchat.serve.model_worker:app \
     --limit-max-requests 0 \
     > "$LOG_PATH/worker.log" 2>&1 &
 
-# 3) OpenAI‑compatible API
+# 3) OpenAI compatible API
 uvicorn fastchat.serve.openai_api_server:app \
     --host 0.0.0.0 --port 8000 \
     --log-level "$LOG_LEVEL" \
