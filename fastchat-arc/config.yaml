@@ -21,7 +21,7 @@ options:
   max_gpu_memory: "8Gib"
   log_level: "debug"
   log_path: "/share/fastchat/logs"
-  hf_user_access_token: ""
+  hf_user_access_token: <YOUR_TOKEN_HERE>
 
 schema:
   model_path: str
