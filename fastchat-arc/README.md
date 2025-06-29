@@ -1,19 +1,21 @@
-# FastChat Intel GPU Add-on for Home Assistant
+# FastChat Home Assistant Add-on (Intel GPU Support)
 
-Run OpenAI-compatible FastChat models on Intel Arc or iGPU hardware inside Home Assistant OS.
+This is a Home Assistant add-on for running FastChat with Intel Arc / iGPU support.
 
-## 🔧 Configuration
+## Features
+- OpenAI-compatible API on port `8000`
+- Web UI on port `7860`
+- Model config and logging path configurable from UI
+- Supports Vicuna, NaturalFunctions, and other models
 
-| Option        | Description                            | Example                         |
-|---------------|----------------------------------------|---------------------------------|
-| `model_path`  | Model directory path                   | `/share/models/vicuna-7b`       |
-| `max_gpu_memory` | Maximum GPU memory allowed          | `14Gib`                         |
-| `log_level`   | Log verbosity                          | `info`, `debug`, `error`        |
-| `log_path`    | Log file directory                     | `/share/fastchat/logs`          |
+## Configuration
 
-## 📡 Features
+```yaml
+model_path: "/share/models/naturalfunctions"
+max_gpu_memory: "8Gib"
+log_path: "/share/fastchat/logs"
+log_level: "debug"
+```
 
-- Intel GPU support
-- OpenAI-compatible API
-- Managed sidebar UI
-- Built for Home Assistant OS
+## Hardware
+- Optimized for Intel iGPU / Arc (Level Zero + OpenCL)
