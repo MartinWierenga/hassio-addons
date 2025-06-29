@@ -22,3 +22,19 @@ schema:
   max_gpu_memory: str
   log_level: list(info|warning|error|debug)
   log_path: str
+
+# Allow access to model storage and logs
+map:
+  - share:rw
+  - config:rw
+  - media:rw
+
+# Allow GPU passthrough and system-level access
+privileged:
+  - SYS_ADMIN
+  - SYS_RAWIO
+  - IPC_LOCK
+  - DAC_READ_SEARCH
+
+# Optional: allow everything (only if needed)
+full_access: true
