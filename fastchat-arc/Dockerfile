@@ -1,16 +1,16 @@
 FROM python:3.10-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && \ 
-    apt-get install -y --no-install-recommends git jq && \ 
+# Install system and Python dependencies
+RUN apt-get update && apt-get install -y git curl && \
+    pip install --no-cache-dir huggingface_hub transformers sentencepiece fastchat uvicorn gradio && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir \
-    git+https://github.com/lm-sys/FastChat.git \
-    fschat[model_worker,webui] \
-    uvicorn
+# Download the model at build time
+RUN python3 -c "\
+from huggingface_hub import snapshot_download;\
+snapshot_download(repo_id='mistralai/Mistral-7B-Instruct-v0.2', local_dir='/models/mistral-7b-instruct', local_dir_use_symlinks=False)"
 
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
-ENTRYPOINT ["/run.sh"]
+
+CMD ["/run.sh"]

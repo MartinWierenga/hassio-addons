@@ -1,37 +1,34 @@
-name: FastChat Intel GPU
+name: "FastChat Arc"
 version: "latest"
-slug: fastchat-arc
-description: Run FastChat with Intel Arc/iGPU (OpenAI API + Web UI)
-startup: application
-ingress: true
-panel_icon: mdi:robot
-panel_title: FastChat
+slug: "fastchat_arc"
+description: "Serve FastChat with Intel GPU (Arc/iGPU) on Home Assistant OS"
+url: "https://github.com/martinwierenga/hassio-addons"
 arch:
   - amd64
+startup: services
+init: false
+host_network: true
 
-image: "ghcr.io/martinwierenga/fastchat-intel-gpu"
+# Allow GPU and volume access
+privileged:
+  - SYS_ADMIN
 
-model_path: "/share/models/mistral-7b-instruct"
-max_gpu_memory: "8Gib"
-log_level: "debug"
-log_path: "/share/fastchat/logs"
+map:
+  - share:rw
 
+options:
+  model_path: "/share/models/mistral-7b-instruct"
+  max_gpu_memory: "8Gib"
+  log_level: "debug"
+  log_path: "/share/fastchat/logs"
 
 schema:
   model_path: str
   max_gpu_memory: str
-  log_level: list(info|warning|error|debug)
+  log_level: list(debug|info|warning|error)
   log_path: str
 
-map:
-  - share:rw
-  - config:rw
-  - media:rw
-
-privileged:
-  - SYS_ADMIN
-  - SYS_RAWIO
-  - IPC_LOCK
-  - DAC_READ_SEARCH
-
-full_access: true
+panel_icon: "mdi:robot"
+panel_title: "FastChat"
+panel_admin: false
+ingress: false
