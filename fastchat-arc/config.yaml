@@ -1,34 +1,30 @@
-name: "FastChat Arc"
-version: "latest"
+name: "FastChat ARC"
+version: "1.0.2"
 slug: "fastchat_arc"
-description: "Serve FastChat with Intel GPU (Arc/iGPU) on Home Assistant OS"
-url: "https://github.com/martinwierenga/hassio-addons"
+description: "FastChat with Intel Arc support and Hugging Face dynamic model loading"
 arch:
   - amd64
 startup: services
+boot: auto
 init: false
 host_network: true
-
-# Allow GPU and volume access
+panel_icon: mdi:robot
+panel_title: "FastChat"
+panel_admin: true
+ingress: false
 privileged:
   - SYS_ADMIN
-
 map:
   - share:rw
-
 options:
   model_path: "/share/models/mistral-7b-instruct"
   max_gpu_memory: "8Gib"
   log_level: "debug"
   log_path: "/share/fastchat/logs"
-
+  hf_token: "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"
 schema:
   model_path: str
   max_gpu_memory: str
   log_level: list(debug|info|warning|error)
   log_path: str
-
-panel_icon: "mdi:robot"
-panel_title: "FastChat"
-panel_admin: false
-ingress: false
+  hf_token: password
