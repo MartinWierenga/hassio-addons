@@ -18,4 +18,4 @@ echo "[INFO] MODEL_PATH    = $MODEL_PATH"
 echo "[INFO] MAX_GPU_MEMORY= $MAX_GPU_MEMORY"
 echo "[INFO] LOG_PATH      = $LOG_PATH"
 
-exec python3 -m fastchat.serve.model_worker     --model-path "$MODEL_PATH"     --max-gpu-memory "$MAX_GPU_MEMORY"
+exec python3 -m fastchat.serve.model_worker $ARGS >> "$LOG_PATH/model_worker.log" 2>&1
