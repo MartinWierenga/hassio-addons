@@ -1,32 +1,20 @@
-name: "FastChat ARC"
-version: "1.0.2"
+name: "FastChat Arc"
+version: "latest"
 slug: "fastchat_arc"
-description: "FastChat with Intel Arc support and Hugging Face dynamic model loading"
+description: "FastChat with Intel GPU support and Hugging Face model download."
 arch:
   - amd64
 startup: services
 boot: auto
-init: false
-host_network: true
-panel_icon: mdi:robot
-panel_title: "FastChat"
-panel_admin: true
-ingress: false
-privileged:
-  - SYS_ADMIN
-map:
-  - share:rw
 options:
   model_path: "/share/models/mistral-7b-instruct"
   max_gpu_memory: "8Gib"
   log_level: "debug"
   log_path: "/share/fastchat/logs"
-  hf_user_access_token: <YOUR_TOKEN_HERE>
-
+  hf_user_access_token: ""
 schema:
   model_path: str
   max_gpu_memory: str
   log_level: list(debug|info|warning|error)
   log_path: str
   hf_user_access_token: password
-
