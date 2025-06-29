@@ -4,7 +4,7 @@ set -e
 MODEL_PATH="${MODEL_PATH:-/share/models/mistral-7b-instruct}"
 MAX_GPU_MEMORY="${MAX_GPU_MEMORY:-8Gib}"
 LOG_PATH="${LOG_PATH:-/share/fastchat/logs}"
-HF_TOKEN="${HF_TOKEN:-}"
+HF_USER_ACCESS_TOKEN="${HF_USER_ACCESS_TOKEN:-""}"
 mkdir -p "$LOG_PATH"
 
 echo "[INFO] FastChat booting..."
@@ -14,17 +14,9 @@ echo "[INFO] LOG_PATH      = $LOG_PATH"
 echo "[INFO] LOG_LEVEL     = ${LOG_LEVEL:-debug}"
 
 # Authenticate and download model from Hugging Face
-if [[ -n "$HF_TOKEN" && ! -d "$MODEL_PATH" ]]; then
-  echo "[INFO] Hugging Face token provided. Downloading model to $MODEL_PATH..."
-  python3 -c "
-from huggingface_hub import snapshot_download
-snapshot_download(
-  repo_id='mistralai/Mistral-7B-Instruct-v0.2',
-  local_dir='$MODEL_PATH',
-  local_dir_use_symlinks=False,
-  token='$HF_TOKEN'
-)
-" || echo '[ERROR] Model download failed!'
+if [[ -n "$HF_USER_ACCESS_TOKEN" ]]; then
+  echo "[INFO] Hugging Face token provided, setting up authentication..."
+  huggingface-cli login --token "$HF_USER_ACCESS_TOKEN"
 fi
 
 # Start controller
